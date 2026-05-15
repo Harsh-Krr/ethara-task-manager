@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit Task' if task else 'New Task' }}{% endblock %}
+{% block page_title %}{{ 'Edit Task' if task else 'Create Task' }}{% endblock %}
+
+{% block content %}
+<div style="max-width:620px">
+  <div class="card">
+    {% if error %}<div class="alert alert-error">⚠ {{ error }}</div>{% endif %}
+
+    <form method="post" action="{{ '/tasks/' + task.id|string + '/edit' if task else '/tasks/create' }}">
+      <div class="form-group">
+        <label class="form-label" for="title">Task Title *</label>
+        <input id="title" name="title" type="text" class="form-control"
+               placeholder="e.g. Design login page" value="{{ task.title if task else '' }}" required/>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="description">Description</label>
+        <textarea id="description" name="description" class="form-control"
+                  placeholder="Describe the task in detail...">{{ task.description if task else '' }}</textarea>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="form-group">
+          <label class="form-label" for="project_id">Project *</label>
+          <select id="project_id" name="project_id" class="form-control" required>
+            <option value="">Select project</option>
+            {% for p in projects %}
+            <option value="{{ p.id }}" {% if (task and task.project_id == p.id) or selected_project_id == p.id %}selected{% endif %}>{{ p.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="assigned_to_id">Assign To</label>
+          <select id="assigned_to_id" name="assigned_to_id" class="form-control">
+            <option value="">Unassigned</option>
+            {% for u in all_users %}
+            <option value="{{ u.id }}" {% if task and task.assigned_to_id == u.id %}selected{% endif %}>{{ u.name }} ({{ u.role.value }})</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="priority">Priority</label>
+          <select id="priority" name="priority" class="form-control">
+            <option value="low" {% if task and task.priority.value=='low' %}selected{% endif %}>🟢 Low</option>
+            <option value="medium" {% if not task or task.priority.value=='medium' %}selected{% endif %}>🟡 Medium</option>
+            <option value="high" {% if task and task.priority.value=='high' %}selected{% endif %}>🔴 High</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="due_date">Due Date</label>
+          <input id="due_date" name="due_date" type="date" class="form-control"
+                 value="{{ task.due_date.isoformat() if task and task.due_date else '' }}"/>
+        </div>
+
+        {% if task %}
+        <div class="form-group">
+          <label class="form-label" for="status">Status</label>
+          <select id="status" name="status" class="form-control">
+            <option value="todo" {% if task.status.value=='todo' %}selected{% endif %}>📌 Todo</option>
+            <option value="in_progress" {% if task.status.value=='in_progress' %}selected{% endif %}>⏳ In Progress</option>
+            <option value="done" {% if task.status.value=='done' %}selected{% endif %}>✅ Done</option>
+          </select>
+        </div>
+        {% endif %}
+      </div>
+
+      <div style="display:flex;gap:12px;margin-top:8px">
+        <button type="submit" class="btn btn-primary">{{ 'Save Changes' if task else 'Create Task' }}</button>
+        <a href="/tasks" class="btn btn-outline">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

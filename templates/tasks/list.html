@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}All Tasks{% endblock %}
+{% block page_title %}All Tasks{% endblock %}
+
+{% block topbar_actions %}
+{% if user.role.value == 'admin' %}
+<a href="/tasks/create" class="btn btn-primary btn-sm">+ New Task</a>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+{% if tasks %}
+
+<!-- Filter Bar -->
+<div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+  <select id="filterStatus" class="form-control" style="width:auto;padding:8px 14px" onchange="filterTasks()">
+    <option value="">All Statuses</option>
+    <option value="todo">Todo</option>
+    <option value="in_progress">In Progress</option>
+    <option value="done">Done</option>
+  </select>
+  <select id="filterPriority" class="form-control" style="width:auto;padding:8px 14px" onchange="filterTasks()">
+    <option value="">All Priorities</option>
+    <option value="high">High</option>
+    <option value="medium">Medium</option>
+    <option value="low">Low</option>
+  </select>
+  <input id="filterSearch" type="text" class="form-control" style="width:240px;padding:8px 14px" placeholder="Search tasks..." oninput="filterTasks()"/>
+</div>
+
+<div class="table-wrap">
+  <table id="tasksTable">
+    <thead>
+      <tr>
+        <th>Task</th><th>Project</th><th>Assigned To</th><th>Priority</th><th>Status</th><th>Due Date</th>
+        {% if user.role.value == 'admin' %}<th>Actions</th>{% endif %}
+      </tr>
+    </thead>
+    <tbody>
+    {% for task in tasks %}
+    {% set is_overdue = task.due_date and task.due_date < today and task.status.value != 'done' %}
+    <tr data-status="{{ task.status.value }}" data-priority="{{ task.priority.value }}" data-title="{{ task.title|lower }}">
+      <td>
+        <div style="font-weight:600">{{ task.title }}</div>
+        {% if task.description %}<div style="font-size:11px;color:var(--text3)">{{ task.description[:50] }}{% if task.description|length > 50 %}…{% endif %}</div>{% endif %}
+        {% if is_overdue %}<span class="badge badge-overdue" style="margin-top:4px">Overdue</span>{% endif %}
+      </td>
+      <td>
+        <a href="/projects/{{ task.project_id }}" style="color:var(--accent-lite);font-size:13px">{{ task.project.name }}</a>
+      </td>
+      <td>
+        {% if task.assignee %}<div class="member-chip"><div class="chip-avatar">{{ task.assignee.name[0].upper() }}</div>{{ task.assignee.name }}</div>
+        {% else %}<span style="color:var(--text3);font-size:12px">Unassigned</span>{% endif %}
+      </td>
+      <td>
+        {% if task.priority.value == 'high' %}<span class="badge badge-high">High</span>
+        {% elif task.priority.value == 'medium' %}<span class="badge badge-medium">Medium</span>
+        {% else %}<span class="badge badge-low">Low</span>{% endif %}
+      </td>
+      <td>
+        <select class="status-select" data-task-id="{{ task.id }}" data-original="{{ task.status.value }}"
+                onchange="updateTaskStatus({{ task.id }}, this.value, this)">
+          <option value="todo" {% if task.status.value=='todo' %}selected{% endif %}>📌 Todo</option>
+          <option value="in_progress" {% if task.status.value=='in_progress' %}selected{% endif %}>⏳ In Progress</option>
+          <option value="done" {% if task.status.value=='done' %}selected{% endif %}>✅ Done</option>
+        </select>
+      </td>
+      <td style="font-size:12px;color:{% if is_overdue %}var(--danger){% else %}var(--text2){% endif %}">
+        {{ task.due_date.strftime('%b %d, %Y') if task.due_date else '—' }}
+      </td>
+      {% if user.role.value == 'admin' %}
+      <td>
+        <div style="display:flex;gap:6px">
+          <a href="/tasks/{{ task.id }}/edit" class="btn btn-outline btn-sm">Edit</a>
+          <form method="post" action="/tasks/{{ task.id }}/delete" onsubmit="return confirmDelete()">
+            <button type="submit" class="btn btn-danger btn-sm">Del</button>
+          </form>
+        </div>
+      </td>
+      {% endif %}
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% else %}
+<div class="empty-state">
+  <div class="empty-icon">📭</div>
+  <h3>No tasks found</h3>
+  <p>{% if user.role.value == 'admin' %}Create a project and start adding tasks.{% else %}You don't have any tasks yet.{% endif %}</p>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+function filterTasks() {
+  const status = document.getElementById('filterStatus').value;
+  const priority = document.getElementById('filterPriority').value;
+  const search = document.getElementById('filterSearch').value.toLowerCase();
+  document.querySelectorAll('#tasksTable tbody tr').forEach(row => {
+    const matchStatus = !status || row.dataset.status === status;
+    const matchPriority = !priority || row.dataset.priority === priority;
+    const matchSearch = !search || row.dataset.title.includes(search);
+    row.style.display = matchStatus && matchPriority && matchSearch ? '' : 'none';
+  });
+}
+</script>
+{% endblock %}

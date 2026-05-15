@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sign Up | TaskFlow</title>
+  <link rel="stylesheet" href="/static/css/style.css"/>
+  <link rel="stylesheet" href="/static/css/auth-doodle.css"/>
+</head>
+<body class="auth-center-body">
+
+  <!-- Full-screen background doodles -->
+  <svg class="doodle-canvas" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+    <!-- Soft background blobs -->
+    <circle cx="30%" cy="40%" r="300" fill="rgba(124,58,237,0.06)" class="blob b1"/>
+    <circle cx="80%" cy="80%" r="200" fill="rgba(59,130,246,0.05)" class="blob b2"/>
+    <circle cx="70%" cy="20%" r="150" fill="rgba(16,185,129,0.04)" class="blob b3"/>
+
+    <!-- Scatter dots -->
+    <circle cx="15%" cy="20%" r="6" fill="rgba(124,58,237,0.5)" class="dot d1"/>
+    <circle cx="10%" cy="60%" r="4" fill="rgba(59,130,246,0.5)" class="dot d2"/>
+    <circle cx="85%" cy="30%" r="5" fill="rgba(16,185,129,0.5)" class="dot d3"/>
+    <circle cx="75%" cy="75%" r="7" fill="rgba(245,158,11,0.5)" class="dot d4"/>
+    <circle cx="25%" cy="85%" r="5" fill="rgba(239,68,68,0.5)" class="dot d5"/>
+
+    <!-- Sparkles -->
+    <text x="20%" y="30%" font-size="18" class="sparkle s1" fill="rgba(167,139,250,0.6)">✦</text>
+    <text x="80%" y="50%" font-size="14" class="sparkle s2" fill="rgba(96,165,250,0.6)">✦</text>
+    <text x="30%" y="70%" font-size="16" class="sparkle s3" fill="rgba(52,211,153,0.6)">✦</text>
+
+    <!-- Dashed arcs -->
+    <path d="M 100 300 Q 300 200 500 300" stroke="rgba(167,139,250,0.15)" stroke-width="2" fill="none" stroke-dasharray="6 6"/>
+    <path d="M 700 700 Q 600 500 800 400" stroke="rgba(96,165,250,0.15)" stroke-width="2" fill="none" stroke-dasharray="6 6"/>
+  </svg>
+
+  <!-- Center Content -->
+  <div class="auth-center-content">
+    
+    <div class="auth-center-text">
+      <div class="logo-icon">⚡</div>
+      <h1>Join your<br/><span class="grad-text">team today.</span></h1>
+      <p>Create your account and start collaborating on projects instantly.</p>
+    </div>
+
+    <div class="auth-card">
+      <h2 class="auth-title">Create account</h2>
+      <p class="auth-subtitle">Join your team on TaskFlow</p>
+
+      {% if error %}
+      <div class="alert alert-error">⚠ {{ error }}</div>
+      {% endif %}
+
+      <form method="post" action="/signup" autocomplete="on">
+        <div class="form-group">
+          <label class="form-label" for="name">Full name</label>
+          <input id="name" name="name" type="text" class="form-control" placeholder="Jane Smith" required/>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="email">Email address</label>
+          <input id="email" name="email" type="email" class="form-control" placeholder="you@example.com" required autocomplete="email"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="password">Password <span style="color:var(--text3);font-weight:400">(min 6 chars)</span></label>
+          <input id="password" name="password" type="password" class="form-control" placeholder="••••••••" required minlength="6"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="role">Role</label>
+          <select id="role" name="role" class="form-control">
+            <option value="member">👤 Member</option>
+            <option value="admin">🛡️ Admin</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:13px;font-size:15px;margin-top:8px;">
+          Create Account →
+        </button>
+      </form>
+
+      <div class="auth-divider">Already have an account?</div>
+      <a href="/login" class="btn btn-outline" style="width:100%;justify-content:center;">Sign in</a>
+    </div>
+
+  </div>
+
+<script src="/static/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if project else 'New' }} Project{% endblock %}
+{% block page_title %}{{ 'Edit Project' if project else 'Create Project' }}{% endblock %}
+
+{% block content %}
+<div style="max-width:560px">
+  <div class="card">
+    {% if error %}
+    <div class="alert alert-error">⚠ {{ error }}</div>
+    {% endif %}
+
+    <form method="post" action="{{ '/projects/' + project.id|string + '/edit' if project else '/projects/create' }}">
+      <div class="form-group">
+        <label class="form-label" for="name">Project Name *</label>
+        <input id="name" name="name" type="text" class="form-control"
+               placeholder="e.g. Website Redesign"
+               value="{{ project.name if project else '' }}" required/>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="description">Description</label>
+        <textarea id="description" name="description" class="form-control"
+                  placeholder="What is this project about?">{{ project.description if project else '' }}</textarea>
+      </div>
+      <div style="display:flex;gap:12px">
+        <button type="submit" class="btn btn-primary">
+          {{ 'Save Changes' if project else 'Create Project' }}
+        </button>
+        <a href="{{ '/projects/' + project.id|string if project else '/projects' }}" class="btn btn-outline">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

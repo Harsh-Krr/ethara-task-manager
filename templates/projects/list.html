@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Projects{% endblock %}
+{% block page_title %}Projects{% endblock %}
+
+{% block topbar_actions %}
+{% if user.role.value == 'admin' %}
+<a href="/projects/create" class="btn btn-primary btn-sm">
+  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  New Project
+</a>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+{% if projects %}
+<div class="projects-grid">
+  {% for project in projects %}
+  {% set total_t = project.tasks|length %}
+  {% set done_t = project.tasks|selectattr('status.value','eq','done')|list|length %}
+  {% set pct = ((done_t / total_t * 100)|int) if total_t > 0 else 0 %}
+  <div class="project-card">
+    <h3><a href="/projects/{{ project.id }}" style="color:var(--text)">{{ project.name }}</a></h3>
+    <p>{{ project.description or 'No description provided.' }}</p>
+    <div class="project-meta">
+      <span>👥 {{ project.members|length }} members</span>
+      <span>📋 {{ total_t }} tasks</span>
+      <span>✅ {{ done_t }} done</span>
+    </div>
+    <div class="progress-bar-wrap" style="margin-bottom:16px">
+      <div class="progress-bar" data-width="{{ pct }}" style="width:0%"></div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:space-between;align-items:center">
+      <span style="font-size:12px;color:var(--text3)">{{ pct }}% complete</span>
+      <div style="display:flex;gap:8px">
+        <a href="/projects/{{ project.id }}" class="btn btn-outline btn-sm">View</a>
+        {% if user.role.value == 'admin' %}
+        <a href="/projects/{{ project.id }}/edit" class="btn btn-outline btn-sm">Edit</a>
+        <form method="post" action="/projects/{{ project.id }}/delete" style="display:inline" onsubmit="return confirmDelete('Delete project and all its tasks?')">
+          <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% else %}
+<div class="empty-state">
+  <div class="empty-icon">📁</div>
+  <h3>No projects yet</h3>
+  <p>{% if user.role.value == 'admin' %}Get started by creating your first project.{% else %}You haven't been added to any projects yet.{% endif %}</p>
+  {% if user.role.value == 'admin' %}
+  <a href="/projects/create" class="btn btn-primary">Create Project</a>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

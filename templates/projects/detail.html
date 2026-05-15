@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% block title %}{{ project.name }}{% endblock %}
+{% block page_title %}{{ project.name }}{% endblock %}
+
+{% block topbar_actions %}
+{% if user.role.value == 'admin' %}
+<a href="/tasks/create?project_id={{ project.id }}" class="btn btn-primary btn-sm">+ Add Task</a>
+<a href="/projects/{{ project.id }}/edit" class="btn btn-outline btn-sm">Edit</a>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+
+<!-- Project meta bar -->
+<div class="card" style="padding:16px 24px;margin-bottom:24px;display:flex;gap:32px;align-items:center">
+  <div>
+    <span style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Created by</span>
+    <div style="font-weight:600;font-size:14px">{{ project.creator.name }}</div>
+  </div>
+  {% set total_t = project.tasks|length %}
+  {% set done_t = project.tasks|selectattr('status.value','eq','done')|list|length %}
+  {% set pct = ((done_t / total_t * 100)|int) if total_t > 0 else 0 %}
+  <div style="flex:1">
+    <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+      <span style="font-size:12px;color:var(--text2)">Progress</span>
+      <span style="font-size:12px;color:var(--text2)">{{ done_t }}/{{ total_t }} tasks done</span>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar" data-width="{{ pct }}" style="width:0%"></div>
+    </div>
+  </div>
+  <div>
+    <span style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Completion</span>
+    <div style="font-weight:700;font-size:20px;color:var(--accent-lite)">{{ pct }}%</div>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 320px;gap:24px;align-items:start">
+
+  <!-- Tasks -->
+  <div>
+    <div class="section-header">
+      <div class="section-title">Tasks ({{ project.tasks|length }})</div>
+      {% if user.role.value == 'admin' %}
+      <a href="/tasks/create?project_id={{ project.id }}" class="btn btn-primary btn-sm">+ Add Task</a>
+      {% endif %}
+    </div>
+
+    {% if project.tasks %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Title</th><th>Assigned To</th><th>Priority</th><th>Status</th><th>Due Date</th>
+            {% if user.role.value == 'admin' %}<th>Actions</th>{% endif %}
+          </tr>
+        </thead>
+        <tbody>
+        {% for task in project.tasks %}
+        {% set is_overdue = task.due_date and task.due_date < today and task.status.value != 'done' %}
+        <tr>
+          <td>
+            <div style="font-weight:600">{{ task.title }}</div>
+            {% if task.description %}<div style="font-size:11px;color:var(--text3)">{{ task.description[:60] }}{% if task.description|length > 60 %}…{% endif %}</div>{% endif %}
+            {% if is_overdue %}<span class="badge badge-overdue" style="margin-top:4px">Overdue</span>{% endif %}
+          </td>
+          <td>
+            {% if task.assignee %}
+            <div class="member-chip">
+              <div class="chip-avatar">{{ task.assignee.name[0].upper() }}</div>
+              {{ task.assignee.name }}
+            </div>
+            {% else %}<span style="color:var(--text3);font-size:12px">Unassigned</span>{% endif %}
+          </td>
+          <td>
+            {% if task.priority.value == 'high' %}<span class="badge badge-high">High</span>
+            {% elif task.priority.value == 'medium' %}<span class="badge badge-medium">Medium</span>
+            {% else %}<span class="badge badge-low">Low</span>{% endif %}
+          </td>
+          <td>
+            <select class="status-select" data-task-id="{{ task.id }}" data-original="{{ task.status.value }}"
+                    onchange="updateTaskStatus({{ task.id }}, this.value, this)">
+              <option value="todo" {% if task.status.value=='todo' %}selected{% endif %}>📌 Todo</option>
+              <option value="in_progress" {% if task.status.value=='in_progress' %}selected{% endif %}>⏳ In Progress</option>
+              <option value="done" {% if task.status.value=='done' %}selected{% endif %}>✅ Done</option>
+            </select>
+          </td>
+          <td style="font-size:12px;color:{% if is_overdue %}var(--danger){% else %}var(--text2){% endif %}">
+            {{ task.due_date.strftime('%b %d, %Y') if task.due_date else '—' }}
+          </td>
+          {% if user.role.value == 'admin' %}
+          <td>
+            <div style="display:flex;gap:6px">
+              <a href="/tasks/{{ task.id }}/edit" class="btn btn-outline btn-sm">Edit</a>
+              <form method="post" action="/tasks/{{ task.id }}/delete" onsubmit="return confirmDelete()">
+                <button type="submit" class="btn btn-danger btn-sm">Del</button>
+              </form>
+            </div>
+          </td>
+          {% endif %}
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="card"><div class="empty-state">
+      <div class="empty-icon">📭</div>
+      <h3>No tasks yet</h3>
+      <p>Add tasks to this project to start tracking progress.</p>
+      {% if user.role.value == 'admin' %}<a href="/tasks/create?project_id={{ project.id }}" class="btn btn-primary btn-sm">Add First Task</a>{% endif %}
+    </div></div>
+    {% endif %}
+  </div>
+
+  <!-- Sidebar: Members -->
+  <div>
+    <div class="section-header">
+      <div class="section-title">Team Members</div>
+    </div>
+    <div class="card">
+      <div class="members-list" style="margin-bottom:{% if user.role.value == 'admin' and non_members %}16px{% else %}0{% endif %}">
+        {% for m in project.members %}
+        <div class="member-chip">
+          <div class="chip-avatar">{{ m.user.name[0].upper() }}</div>
+          <span>{{ m.user.name }}</span>
+          <span class="badge badge-{{ m.user.role.value }}" style="padding:1px 6px;font-size:9px">{{ m.user.role.value }}</span>
+          {% if user.role.value == 'admin' and m.user_id != project.created_by_id %}
+          <form method="post" action="/projects/{{ project.id }}/members/{{ m.user_id }}/remove" style="display:inline">
+            <button type="submit" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:14px;padding:0 2px" title="Remove">×</button>
+          </form>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+
+      {% if user.role.value == 'admin' and non_members %}
+      <div style="border-top:1px solid var(--border);padding-top:16px;margin-top:4px">
+        <div style="font-size:12px;color:var(--text3);margin-bottom:8px;font-weight:600">Add member</div>
+        <form method="post" action="/projects/{{ project.id }}/members/add" style="display:flex;gap:8px">
+          <select name="user_id" class="form-control" style="flex:1;padding:7px 10px">
+            {% for u in non_members %}
+            <option value="{{ u.id }}">{{ u.name }} ({{ u.role.value }})</option>
+            {% endfor %}
+          </select>
+          <button type="submit" class="btn btn-success btn-sm">Add</button>
+        </form>
+      </div>
+      {% endif %}
+    </div>
+
+    {% if project.description %}
+    <div class="card" style="margin-top:16px">
+      <div style="font-size:12px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Description</div>
+      <p style="font-size:13px;color:var(--text2);line-height:1.7">{{ project.description }}</p>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}
