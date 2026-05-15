@@ -2,8 +2,9 @@
 
 A full-stack collaborative task management platform built for **Ethara.AI** using **FastAPI**, **PostgreSQL**, and modern glassmorphism design.
 
-🔗 **Live Demo**: *(Add your Railway URL here after deployment)*  
-📦 **GitHub**: [https://github.com/Harsh-Krr/ethara-task-manager](https://github.com/Harsh-Krr/ethara-task-manager)
+🔗 **Live Demo**: *https://web-production-0e627.up.railway.app/*  
+📦 **GitHub**: *https://github.com/Harsh-Krr/ethara-task-manager*
+🎥 **Demo Video**: *https://drive.google.com/file/d/1a4TsiZCdjCHi4pmBEUEpxrsV-xnaWwPH/view?usp=drive_link*
 
 ---
 
