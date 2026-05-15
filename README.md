@@ -1,25 +1,26 @@
-# TaskFlow — Team Task Manager
+# Ethara Task Manager
 
-A full-stack collaborative task management platform built with **FastAPI** + **PostgreSQL**.
+A full-stack collaborative task management platform built for **Ethara.AI** using **FastAPI**, **PostgreSQL**, and modern glassmorphism design.
 
-🔗 **Live Demo**: *(add Railway URL after deployment)*  
-📦 **GitHub**: *(add your GitHub repo URL here)*
+🔗 **Live Demo**: *(Add your Railway URL here after deployment)*  
+📦 **GitHub**: [https://github.com/Harsh-Krr/ethara-task-manager](https://github.com/Harsh-Krr/ethara-task-manager)
 
 ---
 
-## Features
+## ✨ Features
 
 - 🔐 **Auth** — Signup/Login with JWT (HTTP-only cookies, 7-day session)
-- 👥 **Two-Interface Portal** — Separate Admin & Member UI with strict RBAC
+- 👥 **Two-Interface Portal** — Separate Admin & Member UI with strict Role-Based Access Control (RBAC)
 - 📁 **Project Management** — Create projects, manage team membership
 - ✅ **Task Tracking** — Assign tasks, set priority & due dates, track status
 - 📊 **Dashboard** — Live stats, overdue alerts, project progress bars
+- 🎨 **Modern UI** — Center-focused scrollable auth pages, animated doodles, and a dark glassmorphism theme
 - 🔌 **REST API** — Full JSON API at `/api/...` (Swagger docs at `/api/docs`)
 - 🛡️ **Admin Portal** — Manage users, change roles, remove accounts
 
 ---
 
-## Role Matrix
+## 🔒 Role Matrix
 
 | Action | Admin | Member |
 |--------|-------|--------|
@@ -34,7 +35,7 @@ A full-stack collaborative task management platform built with **FastAPI** + **P
 
 ---
 
-## Tech Stack
+## 🛠️ Tech Stack
 
 | Layer       | Technology                         |
 |-------------|------------------------------------|
@@ -47,12 +48,12 @@ A full-stack collaborative task management platform built with **FastAPI** + **P
 
 ---
 
-## Local Development
+## 💻 Local Development
 
 ### 1. Clone & install
 ```bash
-git clone <repo-url>
-cd team-task-manager
+git clone https://github.com/Harsh-Krr/ethara-task-manager.git
+cd ethara-task-manager
 
 python -m venv venv
 # Windows:
@@ -73,17 +74,19 @@ Open http://localhost:8000
 
 ---
 
-## Deployment on Railway
+## 🚀 Deployment on Railway
 
-1. Push repo to GitHub
-2. Go to [railway.app](https://railway.app) → **New Project → Deploy from GitHub**
-3. Add **PostgreSQL plugin** (sets `DATABASE_URL` automatically)
-4. Add environment variable: `SECRET_KEY=<long random string>`
-5. Deploy — your app goes live 🚀
+1. Push repo to GitHub.
+2. Go to [railway.app](https://railway.app) → **New Project → Deploy from GitHub**.
+3. Add **PostgreSQL plugin** (Railway will provide a `DATABASE_URL` for you).
+4. Go to your App Service → Variables and add:
+   - `DATABASE_URL` (paste the URL from the PostgreSQL service).
+   - `SECRET_KEY` (a long random string like `1a2b3c4d5e...`).
+5. Deploy — your app goes live! 🚀
 
 ---
 
-## API Reference
+## 📖 API Reference
 
 | Method | Endpoint | Description | Access |
 |--------|----------|-------------|--------|
@@ -108,4 +111,4 @@ Open http://localhost:8000
 | POST | `/users/{id}/role` | Change user role | Admin |
 | POST | `/users/{id}/delete` | Delete user | Admin |
 
-Full interactive docs: `/api/docs`
+Full interactive docs available at: `/api/docs`
